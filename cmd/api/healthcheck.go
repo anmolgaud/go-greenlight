@@ -9,10 +9,10 @@ func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Reques
 		"status": "available",
 		"systemInfo": map[string]string{
 			"environment": app.config.env,
-			"version": version,
+			"version":     version,
 		},
 	}
-	err := app.writeJson(w, http.StatusOK, data, nil)
+	err := app.writeJSON(w, http.StatusOK, data, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
