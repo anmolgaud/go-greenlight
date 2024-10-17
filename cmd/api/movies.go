@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"greenlight.anmol.gaud/internal/data"
+	"greenlight.anmol.gaud/internal/validator"
 )
 
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Title   string   `json:"title"`
 		Year    int32    `json:"year"`
-		Runtime int32    `json:"runtime"`
+		Runtime data.Runtime `json:"runtime"`
 		Genres  []string `json:"genres"`
 	}
 	err := app.readJSON(w, r, &input)
@@ -20,6 +21,20 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 		app.badRequestResponse(w, r, err)
 		return
 	}
+	movie := &data.Movie{
+		Title: input.Title,
+		Year: input.Year,
+		Runtime: input.Runtime,
+		Genres: input.Genres,
+	}
+	
+	v := validator.New()
+	data.ValidateMovie(v, movie)
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return;
+	}
+
 	fmt.Fprintf(w, "%+v/n", input)
 }
 
@@ -35,7 +50,7 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 		CreatedAt: time.Now(),
 		Title:     "Batman",
 		Runtime:   102,
-		Genre:     []string{"drama", "action", "thriller"},
+		Genres:     []string{"drama", "action", "thriller"},
 		Version:   1,
 	}
 
